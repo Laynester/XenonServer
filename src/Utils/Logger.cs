@@ -24,9 +24,17 @@ public class Logger
         PrintMessage(message, Green);
     }
 
-    public void Error<T>(object message, T? trace = null) where T : Exception
+    public void Error(object message)
     {
-        PrintMessage(trace ?? message, Red);
+        PrintMessage(message, Red);
+    }
+    
+    public void Error<T>(object message, T? trace = null) where T : Exception?
+    {
+        PrintMessage(message, Red);
+        
+        if (trace != null) 
+            PrintMessage(trace, Red);
     }
 
     public void Warn(object message)
