@@ -8,11 +8,17 @@ public class HandshakeHandler : Handler
 {
     public HandshakeHandler()
     {
-        On(IncomingMessages.AUTH_TICKET, (msg) => OnReleaseVersion(msg));
+        On(IncomingMessages.AUTH_TICKET, (msg) => OnAuthTicket((AuthTicketEvent)msg));
+        On(IncomingMessages.PING, (msg) => OnPing((PingEvent)msg));
     }
 
-    private void OnReleaseVersion(ClientHelloEvent evt)
+    private void OnPing(PingEvent evt)
     {
-        Console.WriteLine(evt._Build);
+        Console.WriteLine(evt.Yuh);
+    }
+
+    private void OnAuthTicket(AuthTicketEvent evt)
+    {
+        Console.WriteLine(evt.Ticket);
     }
 }

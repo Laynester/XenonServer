@@ -24,19 +24,18 @@ public class PacketManager
         {
             Console.WriteLine(data);
 
-            if (client == null || !IsRegistered(packet.header)) return;
+            if (client == null || !IsRegistered(packet.Header)) return;
 
-            Type messageType = _Incoming[packet.header];
+            if (_Incoming.TryGetValue(packet.Header, out Type messageType))
+            {
+                IncomingMessage? message = (IncomingMessage)JsonSerializer.Deserialize(data, messageType);
+                _HandlerManager.Dispatch(message);
+            }
 
-            IncomingMessage? message = JsonSerializer.Deserialize < messageType.GetType() > (data);
-
-            if (message == null) return;
-
-            //_HandlerManager.Dispatch(JsonSerializer.Deserialize<IncomingMessage>(packet.message));
         }
-        catch (System.Exception)
+        catch (System.Exception ex)
         {
-            //ignored for now
+            Console.WriteLine(ex);
         }
     }
 
@@ -47,6 +46,7 @@ public class PacketManager
 
     public void RegisterPackets()
     {
+        _Incoming.Add(IncomingMessages.PING, typeof(PingEvent));
         _Incoming.Add(IncomingMessages.AUTH_TICKET, typeof(AuthTicketEvent));
     }
 

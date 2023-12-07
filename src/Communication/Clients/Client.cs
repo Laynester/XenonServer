@@ -32,7 +32,6 @@ public class Client : WsSession
         byte[] data = System.Convert.FromBase64String(base64);
         string message = ASCIIEncoding.ASCII.GetString(data);
         IncomingMessage packet = JsonSerializer.Deserialize<IncomingMessage>(message);
-        string = packet.header;
         _packetManager.HandlePacket(this, packet, message);
     }
 
