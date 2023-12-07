@@ -8,22 +8,21 @@ namespace Xenon;
 
 public sealed class XenonEnvironment
 {
-    private static readonly XenonEnvironment instance = new XenonEnvironment();
+    
     private Logger _Logger;
     private Websockets? _Sockets;
     private DatabaseManager _DatabaseManager;
-
-    static XenonEnvironment() { }
+    
     private XenonEnvironment()
     {
         _Logger = new Logger(GetType().Name);
 
-        _Logger.Logo();
+        Logger.Logo();
 
         Initialize();
     }
 
-    public void Initialize()
+    private void Initialize()
     {
         _Sockets = new Websockets(IPAddress.Any, 3000);
         _Sockets.Start();
@@ -37,7 +36,7 @@ public sealed class XenonEnvironment
     {
         for (; ; )
         {
-            string line = Console.ReadLine();
+            var line = Console.ReadLine();
             if (string.IsNullOrEmpty(line))
                 break;
 
@@ -52,16 +51,9 @@ public sealed class XenonEnvironment
             // Multicast admin message to all sessions
             line = "(admin) " + line;
             _Sockets.MulticastText(line);
-
         }
     }
-
-
-    public static XenonEnvironment Instance
-    {
-        get
-        {
-            return instance;
-        }
-    }
+    
+    public static XenonEnvironment Instance { get; } = new();
+    
 }
