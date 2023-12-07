@@ -1,6 +1,6 @@
 namespace Xenon.Communication.Messages.Outgoing.Handshake;
 
-public class AuthenticationOK : OutgoingMessage
+public class AuthenticationOk : OutgoingMessage
 {
-    public AuthenticationOK() : base(OutgoingMessages.AUTHENTICATED) { }
+    public AuthenticationOk() : base(OutgoingMessages.AUTHENTICATED) { }
 }

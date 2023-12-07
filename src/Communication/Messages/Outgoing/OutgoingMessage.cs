@@ -4,24 +4,25 @@ using System.Text;
 
 public class OutgoingMessage
 {
-    private byte[] message;
-    public short Header;
-    private uint index;
+    
+    private byte[] _message;
+    public short HEADER;
+    private uint _index;
 
     public OutgoingMessage(short header)
     {
-        Header = header;
-        message = Array.Empty<byte>();
-        index = 0;
+        HEADER = header;
+        _message = Array.Empty<byte>();
+        _index = 0;
 
         WriteShort(header);
     }
 
     public void WriteByte(byte value)
     {
-        Array.Resize(ref message, message.Length + 1);
-        message[^1] = value;
-        index++;
+        Array.Resize(ref _message, _message.Length + 1);
+        _message[^1] = value;
+        _index++;
     }
 
     public void WriteBool(bool value)
@@ -62,14 +63,14 @@ public class OutgoingMessage
     public byte[] Compose()
     {
         byte[] lengthBytes = new byte[4];
-        lengthBytes[0] = (byte)((index >> 24) & 0xFF);
-        lengthBytes[1] = (byte)((index >> 16) & 0xFF);
-        lengthBytes[2] = (byte)((index >> 8) & 0xFF);
-        lengthBytes[3] = (byte)(index & 0xFF);
+        lengthBytes[0] = (byte)((_index >> 24) & 0xFF);
+        lengthBytes[1] = (byte)((_index >> 16) & 0xFF);
+        lengthBytes[2] = (byte)((_index >> 8) & 0xFF);
+        lengthBytes[3] = (byte)(_index & 0xFF);
 
-        byte[] result = new byte[lengthBytes.Length + message.Length];
+        byte[] result = new byte[lengthBytes.Length + _message.Length];
         Array.Copy(lengthBytes, result, lengthBytes.Length);
-        Array.Copy(message, 0, result, lengthBytes.Length, message.Length);
+        Array.Copy(_message, 0, result, lengthBytes.Length, _message.Length);
 
         return result;
     }
@@ -80,7 +81,7 @@ public class OutgoingMessage
 
         byteArray.AddRange(bytes);
 
-        message = byteArray.ToArray();
-        index += (uint)bytes.Length;
+        _message = byteArray.ToArray();
+        _index += (uint)bytes.Length;
     }
 }

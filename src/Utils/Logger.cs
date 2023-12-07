@@ -54,7 +54,7 @@ public class Logger
     {
         if (!_print) return;
 
-        var time = DateTimeOffset.Now.ToString("H:mm:ss");
+        var time = DateTimeOffset.Now.ToString("H:mm:ss.fff");
         var name = $" [{_name}] ";
 
         Console.Write(time);

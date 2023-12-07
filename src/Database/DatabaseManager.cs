@@ -1,48 +1,35 @@
 using Dapper;
 using Xenon.Database.Entities;
-using Xenon.Utils;
 using MySql.Data.MySqlClient;
 
 namespace Xenon.Database;
 
 public class DatabaseManager
 {
-    private Logger _Logger;
-    private MySqlConnection connection;
+    
+    private readonly MySqlConnection _connection;
+    
+    public List<ServerConfigEntity> ServerConfig { get; init; }
 
     public DatabaseManager()
     {
-        _Logger = new Logger(GetType().Name);
+        var server = "localhost";
+        var database = "Xenon";
+        var uid = "root";
+        var password = "";
 
-        try
-        {
-            Initialize();
+        var connectionString = $"SERVER={server};DATABASE={database};UID={uid};PASSWORD={password};";
 
-            using (var connection = this.connection)
-            {
-                // Create a query that retrieves all authors"    
-                var sql = "SELECT * FROM server_config";
-                // Use the Query method to execute the query and return a list of objects
-                List<ServerConfigEntity> authors = connection.Query<ServerConfigEntity>(sql).ToList();
-            }
-        }
-        catch (System.Exception)
-        {
+        _connection = new MySqlConnection(connectionString);
+        _connection.Open();
 
-            _Logger.Error("Could not connect to database!");
-        }
+        using var connection = _connection;
+            
+        // Create a query that retrieves all authors"    
+        const string sql = "SELECT * FROM server_config";
+            
+        // Use the Query method to execute the query and return a list of objects
+        ServerConfig = connection.Query<ServerConfigEntity>(sql).ToList();
     }
-
-    private void Initialize()
-    {
-        var server = "localhost";  // Update with your MySQL server
-        var database = "Xenon";  // Update with your database name
-        var uid = "root";  // Update with your MySQL username
-        var password = "";  // Update with your MySQL password
-
-        string connectionString = $"SERVER={server};DATABASE={database};UID={uid};PASSWORD={password};";
-
-        connection = new MySqlConnection(connectionString);
-        connection.Open();
-    }
+    
 }

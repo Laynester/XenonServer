@@ -1,5 +1,5 @@
-﻿using System.Net;
-using System.Net.Sockets;
+﻿using System.Diagnostics;
+using System.Net;
 using Xenon.Communication;
 using Xenon.Database;
 using Xenon.Utils;
@@ -9,32 +9,52 @@ namespace Xenon;
 public sealed class XenonEnvironment
 {
     
-    private Logger _Logger;
-    private Websockets? _Sockets;
-    private DatabaseManager _DatabaseManager;
+    private readonly Logger _logger = new(nameof(XenonEnvironment));
+    
+    private readonly WebSockets _sockets;
+    private DatabaseManager _databaseManager = null!;
     
     private XenonEnvironment()
     {
-        _Logger = new Logger(GetType().Name);
-
         Logger.Logo();
-
-        Initialize();
-    }
-
-    private void Initialize()
-    {
-        _Sockets = new Websockets(IPAddress.Any, 3000);
-        _Sockets.Start();
-
-        _DatabaseManager = new DatabaseManager();
+        
+        MeasureTimeTaken("Database", () => _databaseManager = new DatabaseManager());
+        
+        // Starting the socket server should be the last thing we do, we don't want clients connecting before we're ready
+        _sockets = new WebSockets(IPAddress.Any, 3000);
+        _sockets.Start();
+        
+        _logger.Info("Successfully initialized Xenon!");
 
         ConsoleScanner();
     }
 
+    private void MeasureTimeTaken(string taskName, Action action)
+    {
+        _logger.Info($"Initializing {taskName}...");
+        
+        var stopwatch = new Stopwatch();
+        
+        stopwatch.Start();
+
+        try
+        {
+            action();
+        }
+        catch (Exception exc)
+        {
+            _logger.Error($"Failed to initialize {taskName}!", exc);
+            Environment.Exit(1);
+        }
+        
+        stopwatch.Stop();
+        
+        _logger.Info($"Successfully initialized {taskName} in {stopwatch.ElapsedMilliseconds}ms!");
+    }
+
     private void ConsoleScanner()
     {
-        for (; ; )
+        while (true)
         {
             var line = Console.ReadLine();
             if (string.IsNullOrEmpty(line))
@@ -44,13 +64,13 @@ public sealed class XenonEnvironment
             if (line == "!")
             {
                 Console.Write("Server restarting...");
-                _Sockets.Restart();
+                _sockets.Restart();
                 Console.WriteLine("Done!");
             }
 
             // Multicast admin message to all sessions
             line = "(admin) " + line;
-            _Sockets.MulticastText(line);
+            _sockets.MulticastText(line);
         }
     }
     

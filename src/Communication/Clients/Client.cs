@@ -1,6 +1,5 @@
 using System.Net.Sockets;
 using System.Text;
-using Xenon.Communication.Messages;
 using Xenon.Communication.Messages.Incoming;
 using Xenon.Communication.Messages.Outgoing;
 using NetCoreServer;
@@ -10,10 +9,12 @@ namespace Xenon.Communication.Clients;
 
 public class Client : WsSession
 {
-    private PacketManager _packetManager;
-    public Client(WsServer server, PacketManager mgr) : base(server)
+    
+    private readonly IncomingPacketManager _incomingPacketManager;
+    
+    public Client(WsServer server, IncomingPacketManager mgr) : base(server)
     {
-        this._packetManager = mgr;
+        _incomingPacketManager = mgr;
     }
 
     public override void OnWsConnected(HttpRequest request)
@@ -28,11 +29,12 @@ public class Client : WsSession
 
     public override void OnWsReceived(byte[] buffer, long offset, long size)
     {
-        string base64 = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
-        byte[] data = System.Convert.FromBase64String(base64);
-        string message = ASCIIEncoding.ASCII.GetString(data);
-        IncomingMessage packet = JsonSerializer.Deserialize<IncomingMessage>(message);
-        _packetManager.HandlePacket(this, packet, message);
+        var base64 = Encoding.UTF8.GetString(buffer, (int) offset, (int) size);
+        var data = Convert.FromBase64String(base64);
+        var message = Encoding.ASCII.GetString(data);
+        var packet = JsonSerializer.Deserialize<IncomingMessage>(message);
+        
+        _incomingPacketManager.HandlePacket(this, packet!, message);
     }
 
     protected override void OnError(SocketError error)
@@ -42,7 +44,8 @@ public class Client : WsSession
 
     public void SendMessage(OutgoingMessage msg)
     {
-        byte[] buffer = msg.Compose();
+        var buffer = msg.Compose();
         SendBinaryAsync(buffer, 0, buffer.Length);
     }
+    
 }

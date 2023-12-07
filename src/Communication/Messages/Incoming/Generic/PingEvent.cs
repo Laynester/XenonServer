@@ -1,6 +1,8 @@
-namespace Xenon.Communication.Messages.Incoming.Handshake;
+namespace Xenon.Communication.Messages.Incoming.Generic;
 
 public class PingEvent : IncomingMessage
 {
-    public required string Yuh { get; set; }
+    
+    public required string Yuh { get; init; }
+    
 }
