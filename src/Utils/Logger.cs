@@ -1,25 +1,22 @@
-﻿using System;
-using System;
-using System.IO;
-
-namespace Xenon.Utils;
+﻿namespace Xenon.Utils;
 
 public class Logger
 {
-    private static long LAST_TIMESTAMP = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+    
+    private static long _lastTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
-    private string _name;
-    private object _description;
-    private bool _print;
-    private int maxChar = 20;
-    private Func<string, string> colour;
+    private readonly string? _name;
+    private readonly bool _print;
+    private readonly Func<string, string> _colour;
+    
+    private const int MaxChar = 20;
 
     public Logger(string name, object? description = null, Func<string, string>? colour = null)
     {
-        this._name = name;
-        this._description = description;
-        this._print = true;
-        this.colour = colour ?? Cyan;
+        _name = name;
+        Description = description;
+        _print = true;
+        _colour = colour ?? Cyan;
     }
 
     public void Info(object message)
@@ -27,9 +24,17 @@ public class Logger
         PrintMessage(message, Green);
     }
 
-    public void Error(object message, object? trace = null)
+    public void Error(object message)
     {
-        PrintMessage(trace ?? message, Red);
+        PrintMessage(message, Red);
+    }
+    
+    public void Error<T>(object message, T? trace = null) where T : Exception?
+    {
+        PrintMessage(message, Red);
+        
+        if (trace != null) 
+            PrintMessage(trace, Red);
     }
 
     public void Warn(object message)
@@ -39,10 +44,10 @@ public class Logger
 
     public void Debug(object message)
     {
-        var temp = _description;
-        _description = "DEBUG";
+        var temp = Description;
+        Description = "DEBUG";
         PrintMessage($"{message}", YellowBright);
-        _description = temp;
+        Description = temp;
     }
 
     private void PrintMessage(object message, Func<string, string>? color = null)
@@ -56,54 +61,50 @@ public class Logger
 
         var length = time.Length + (!string.IsNullOrEmpty(_name) ? name.Length : 0);
 
-        for (var i = 0; i < maxChar - length; i++)
+        for (var i = 0; i < MaxChar - length; i++)
         {
             Console.Write(" ");
         }
 
-        if (_name != null) Console.Write(colour(name));
+        if (_name != null) Console.Write(_colour(name));
 
-        if (_description != null)
-            Console.Write(Grey($"[{_description}] "));
+        if (Description != null)
+            Console.Write(Grey($"[{Description}] "));
 
-        Console.Write(color?.Invoke(message.ToString()));
+        var stringMessage = message.ToString();
+        if (stringMessage != null)
+            Console.Write(color?.Invoke(stringMessage));
 
         PrintTimestamp();
 
         Console.Write("\n");
     }
 
-    private void PrintTimestamp()
+    private static void PrintTimestamp()
     {
         var now = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
-        Console.Write(Grey($" +{now - LAST_TIMESTAMP}ms"));
+        Console.Write(Grey($" +{now - _lastTimestamp}ms"));
 
-        LAST_TIMESTAMP = now;
+        _lastTimestamp = now;
     }
 
-    public void Logo()
+    public static void Logo()
     {
-        Console.WriteLine(Cyan(@"
-__  __                      
-\ \/ /___ _ __   ___  _ __  
- \  // _ \ '_ \ / _ \| '_ \ 
- /  \  __/ | | | (_) | | | |
-/_/\_\___|_| |_|\___/|_| |_|                          
-"));
+        Console.WriteLine(Cyan("""
+
+                               __  __
+                               \ \/ /___ _ __   ___  _ __
+                                \  // _ \ '_ \ / _ \| '_ \
+                                /  \  __/ | | | (_) | | | |
+                               /_/\_\___|_| |_|\___/|_| |_|
+
+                               """));
     }
 
-    public object Description
-    {
-        get { return _description; }
-        set { _description = value; }
-    }
+    public object? Description { get; set; }
 
-    public bool Print
-    {
-        get { return _print; }
-        set { _print = value; }
-    }
+    public bool Print { get; set; }
 
     private static string Grey(string input) => $"\u001b[90m{input}\u001b[39m";
     private static string Green(string input) => $"\u001b[32m{input}\u001b[39m";
@@ -111,5 +112,5 @@ __  __
     private static string Yellow(string input) => $"\u001b[33m{input}\u001b[39m";
     private static string YellowBright(string input) => $"\u001b[93m{input}\u001b[39m";
     private static string Cyan(string input) => $"\u001b[36m{input}\u001b[39m";
+    
 }
-
