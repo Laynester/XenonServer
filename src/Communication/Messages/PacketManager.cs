@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using Xenon.Communication.Clients;
@@ -17,22 +18,21 @@ public class PacketManager
         RegisterPackets();
     }
 
-    public void HandlePacket(Client client, IncomingMessage packet)
+    public void HandlePacket(Client client, IncomingMessage packet, string data)
     {
         try
         {
-            Console.WriteLine(packet.message);
+            Console.WriteLine(data);
 
-            if (client == null || !IsRegistered(packet.Header)) return;
+            if (client == null || !IsRegistered(packet.header)) return;
 
-            var messageType = _Incoming[packet.Header];
+            Type messageType = _Incoming[packet.header];
 
-            IncomingMessage? message = (IncomingMessage)Activator.CreateInstance(messageType, client, packet.message)!;
+            IncomingMessage? message = JsonSerializer.Deserialize < messageType.GetType() > (data);
 
             if (message == null) return;
 
-
-            _HandlerManager.Dispatch(JsonSerializer.Deserialize<IncomingMessage>(packet.message));
+            //_HandlerManager.Dispatch(JsonSerializer.Deserialize<IncomingMessage>(packet.message));
         }
         catch (System.Exception)
         {

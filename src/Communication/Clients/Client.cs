@@ -4,6 +4,7 @@ using Xenon.Communication.Messages;
 using Xenon.Communication.Messages.Incoming;
 using Xenon.Communication.Messages.Outgoing;
 using NetCoreServer;
+using System.Text.Json;
 
 namespace Xenon.Communication.Clients;
 
@@ -27,8 +28,12 @@ public class Client : WsSession
 
     public override void OnWsReceived(byte[] buffer, long offset, long size)
     {
-        String base64 = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
-        _packetManager.HandlePacket(this, new IncomingMessage(base64));
+        string base64 = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
+        byte[] data = System.Convert.FromBase64String(base64);
+        string message = ASCIIEncoding.ASCII.GetString(data);
+        IncomingMessage packet = JsonSerializer.Deserialize<IncomingMessage>(message);
+        string = packet.header;
+        _packetManager.HandlePacket(this, packet, message);
     }
 
     protected override void OnError(SocketError error)
