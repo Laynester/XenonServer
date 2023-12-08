@@ -1,55 +1,43 @@
-﻿using System.Diagnostics;
-using System.Net;
+﻿using System.Net;
 using Xenon.Communication;
+using Xenon.Core.Config;
 using Xenon.Database;
 using Xenon.Utils;
 
 namespace Xenon;
 
-public sealed class XenonEnvironment
+public sealed class XenonEnvironment : Loggable
 {
-    
-    private readonly Logger _logger = new(nameof(XenonEnvironment));
-    
-    private readonly WebSockets _sockets;
-    private DatabaseManager _databaseManager = null!;
-    
-    private XenonEnvironment()
+
+    private static DatabaseManager _database = null!;
+    private static WebSockets _sockets = null!;
+    private static ConfigManager _config = null!;
+
+    public XenonEnvironment()
     {
         Logger.Logo();
-        
-        MeasureTimeTaken("Database", () => _databaseManager = new DatabaseManager());
-        
-        // Starting the socket server should be the last thing we do, we don't want clients connecting before we're ready
-        _sockets = new WebSockets(IPAddress.Any, 3000);
-        _sockets.Start();
-        
-        _logger.Info("Successfully initialized Xenon!");
-
-        ConsoleScanner();
-    }
-
-    private void MeasureTimeTaken(string taskName, Action action)
-    {
-        _logger.Info($"Initializing {taskName}...");
-        
-        var stopwatch = new Stopwatch();
-        
-        stopwatch.Start();
 
         try
         {
-            action();
+            _database = new DatabaseManager();
+
+            // Starting the socket server should be the last thing we do, we don't want clients connecting before we're ready
+            _sockets = new WebSockets(IPAddress.Any, 3000);
+            _sockets.Start();
+
+            _config = new ConfigManager();
+            _config.Load();
+
+            _logger.Info("Successfully initialized Xenon!");
+
+            ConsoleScanner();
         }
-        catch (Exception exc)
+        catch (Exception ex)
         {
-            _logger.Error($"Failed to initialize {taskName}!", exc);
-            Environment.Exit(1);
+            if (ex.Message.Length > 0)
+                _logger.Error(ex);
         }
-        
-        stopwatch.Stop();
-        
-        _logger.Info($"Successfully initialized {taskName} in {stopwatch.ElapsedMilliseconds}ms!");
+
     }
 
     private void ConsoleScanner()
@@ -73,7 +61,9 @@ public sealed class XenonEnvironment
             _sockets.MulticastText(line);
         }
     }
-    
-    public static XenonEnvironment Instance { get; } = new();
-    
+
+    public static DatabaseManager Database() => _database;
+
+    public static ConfigManager Config() => _config;
+
 }

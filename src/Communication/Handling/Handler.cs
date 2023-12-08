@@ -5,7 +5,7 @@ namespace Xenon.Communication.Handling;
 
 public class Handler
 {
-    
+
     private readonly Dictionary<string, Action<Client, IncomingMessage>> _listeners = new();
 
     protected void On(string header, Action<Client, IncomingMessage> callback)
@@ -21,5 +21,5 @@ public class Handler
 
         callback(client, msg);
     }
-    
+
 }

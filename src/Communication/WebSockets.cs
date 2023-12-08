@@ -10,7 +10,7 @@ namespace Xenon.Communication;
 
 public class WebSockets : WsServer
 {
-    
+
     private readonly IncomingPacketManager _incomingPacketManager;
     private readonly Logger _logger = new(nameof(WebSockets));
 
@@ -30,7 +30,7 @@ public class WebSockets : WsServer
 
     protected override void OnError(SocketError error)
     {
-        Console.WriteLine($"Chat WebSocket server caught an error with code {error}");
+        // unhandle
     }
-    
+
 }

@@ -20,7 +20,7 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.15" />
     <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
-    <PackageReference Include="MySql.Data" Version="8.2.0" />
+    <PackageReference Include="MySqlConnector" Version="2.2.5" />
     <PackageReference Include="NetCoreServer" Version="7.0.0" />
   </ItemGroup>
 </Project>

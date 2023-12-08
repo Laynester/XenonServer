@@ -1,35 +1,42 @@
 using Dapper;
 using Xenon.Database.Entities;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
+using Xenon.Utils;
 
 namespace Xenon.Database;
 
-public class DatabaseManager
+public class DatabaseManager : Loggable
 {
-    
-    private readonly MySqlConnection _connection;
-    
+
+    private readonly string _connectionStr;
+
     public List<ServerConfigEntity> ServerConfig { get; init; }
 
     public DatabaseManager()
     {
-        var server = "localhost";
-        var database = "Xenon";
-        var uid = "root";
-        var password = "";
+        _logger.Info("Initializing Database");
 
-        var connectionString = $"SERVER={server};DATABASE={database};UID={uid};PASSWORD={password};";
+        try
+        {
+            var server = "localhost";
+            var database = "Xenon";
+            var uid = "root";
+            var password = "";
 
-        _connection = new MySqlConnection(connectionString);
-        _connection.Open();
+            _connectionStr = $"SERVER={server};DATABASE={database};UID={uid};PASSWORD={password};";
 
-        using var connection = _connection;
-            
-        // Create a query that retrieves all authors"    
-        const string sql = "SELECT * FROM server_config";
-            
-        // Use the Query method to execute the query and return a list of objects
-        ServerConfig = connection.Query<ServerConfigEntity>(sql).ToList();
+            _logger.Info("Database initialized!");
+        }
+        catch (Exception)
+        {
+            _logger.Error("Database failed to connect!");
+            throw new Exception("");
+        }
     }
-    
+
+    public MySqlConnection Connection()
+    {
+        return new MySqlConnection(_connectionStr);
+    }
+
 }

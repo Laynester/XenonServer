@@ -2,14 +2,14 @@
 
 public class Logger
 {
-    
+
     private static long _lastTimestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds();
 
     private readonly string? _name;
     private readonly bool _print;
     private readonly Func<string, string> _colour;
-    
-    private const int MaxChar = 20;
+
+    private const int MaxChar = 28;
 
     public Logger(string name, object? description = null, Func<string, string>? colour = null)
     {
@@ -28,12 +28,12 @@ public class Logger
     {
         PrintMessage(message, Red);
     }
-    
+
     public void Error<T>(object message, T? trace = null) where T : Exception?
     {
         PrintMessage(message, Red);
-        
-        if (trace != null) 
+
+        if (trace != null)
             PrintMessage(trace, Red);
     }
 
@@ -54,7 +54,7 @@ public class Logger
     {
         if (!_print) return;
 
-        var time = DateTimeOffset.Now.ToString("H:mm:ss.fff");
+        var time = DateTimeOffset.Now.ToString("H:mm:ss");
         var name = $" [{_name}] ";
 
         Console.Write(time);
@@ -112,5 +112,5 @@ public class Logger
     private static string Yellow(string input) => $"\u001b[33m{input}\u001b[39m";
     private static string YellowBright(string input) => $"\u001b[93m{input}\u001b[39m";
     private static string Cyan(string input) => $"\u001b[36m{input}\u001b[39m";
-    
+
 }

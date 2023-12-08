@@ -6,12 +6,13 @@ namespace Xenon.Communication.Handling;
 
 public class HandlerManager
 {
-    
+
     private readonly List<Handler> _handlers = new();
-    
+
     public HandlerManager()
     {
         _handlers.Add(new HandshakeHandler());
+        _handlers.Add(new GenericHandler());
     }
 
     public void Dispatch(Client client, IncomingMessage msg)
@@ -19,5 +20,5 @@ public class HandlerManager
         foreach (var handler in _handlers)
             handler.Dispatch(client, msg);
     }
-    
+
 }

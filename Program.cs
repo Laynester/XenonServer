@@ -1,4 +1,4 @@
 ﻿using Xenon;
 
 Console.Clear();
-var instance = XenonEnvironment.Instance;
+new XenonEnvironment();

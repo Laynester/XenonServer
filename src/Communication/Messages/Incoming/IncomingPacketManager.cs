@@ -10,13 +10,13 @@ namespace Xenon.Communication.Messages.Incoming;
 
 public class IncomingPacketManager
 {
-    
+
     private readonly Logger _logger = new(nameof(IncomingPacketManager));
-    
+
     private readonly Dictionary<string, Type?> _incoming = new();
 
     private readonly HandlerManager _handlerManager = new();
-    
+
     public IncomingPacketManager()
     {
         RegisterGenericPackets();
@@ -26,8 +26,9 @@ public class IncomingPacketManager
     private void RegisterGenericPackets()
     {
         RegisterPacket(IncomingMessages.Ping, typeof(PingEvent));
+        RegisterPacket(IncomingMessages.RequestDesktop, typeof(RequestDesktopEvent));
     }
-    
+
     private void RegisterHandshakePackets()
     {
         RegisterPacket(IncomingMessages.AuthTicket, typeof(AuthTicketEvent));
@@ -48,9 +49,9 @@ public class IncomingPacketManager
             if (!_incoming.TryGetValue(packet.Header, out var messageType)) return;
 
             if (messageType == null) return;
-            
-            var message = (IncomingMessage) JsonSerializer.Deserialize(data, messageType)!;
-            
+
+            var message = (IncomingMessage)JsonSerializer.Deserialize(data, messageType)!;
+
             _handlerManager.Dispatch(client, message);
         }
         catch (Exception ex)
@@ -63,22 +64,9 @@ public class IncomingPacketManager
     {
         return _incoming.ContainsKey(header);
     }
-    
+
     public void RegisterPacket(string header, Type? type)
     {
         _incoming.Add(header, type);
     }
-
-    public static string CleanUp(byte[] bytes)
-    {
-        var str = Encoding.UTF8.GetString(bytes);
-
-        for (var i = 0; i <= 31; i++)
-        {
-            str = str.Replace(Convert.ToChar(i).ToString(), "[" + i + "]");
-        }
-
-        return str;
-    }
-    
 }

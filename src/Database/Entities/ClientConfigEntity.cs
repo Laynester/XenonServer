@@ -1,6 +1,6 @@
 namespace Xenon.Database.Entities;
 
-public class ServerConfigEntity
+public class ClientConfigEntity
 {
 
     public required string Key { get; set; }
